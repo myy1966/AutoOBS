@@ -1,0 +1,12 @@
+.vscode/
+
+AutoOBS/__pycache__/
+AutoOBS/logs/
+AutoOBS/conf.toml
+
+__pycache__/
+build/
+dist/
+AutoOBS.spec
+
+test/

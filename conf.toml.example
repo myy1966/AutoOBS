@@ -1,0 +1,13 @@
+[obs]
+host = "localhost"
+port = 4444
+password = "password"
+
+# optional
+[AutoOBS]
+# sensitivity of keyboard & mouse listener, ms, default is 100
+listener_timer_time = 100
+# step of counter, s, default is 1
+counter_interval = 1
+# bound of counter, s, default is 10
+counter_bound = 10
