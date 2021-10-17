@@ -7,6 +7,7 @@ AutoOBS/conf.toml
 __pycache__/
 build/
 dist/
+logs/
 AutoOBS.spec
 
 test/
