@@ -11,3 +11,5 @@ listener_timer_time = 100
 counter_interval = 1
 # bound of counter, s, default is 10
 counter_bound = 10
+# time to stop OBS studio, it's time to sleep, stop working, buddies!
+stop_times = [00:00:00, 01:00:00]
