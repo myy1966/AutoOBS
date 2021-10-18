@@ -124,7 +124,7 @@ class ListenWorker(QObject):
             self.counter.reset()
             self.resume_sig.emit()
         else:
-            self.logger.debug("Reset counter and emit resume.")
+            self.logger.debug("Timer is not overflow, will not emit resume.")
 
     def on_press(self, key) -> None:
         self.logger.debug("Key {} pressed.".format(key))

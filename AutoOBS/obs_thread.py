@@ -62,14 +62,21 @@ class ObsWorker(QObject):
     def _ws_call(self, req: requests.Baserequests) -> None:
         try:
             self.ws.call(req)
-        except obswebsocket.exceptions.MessageTimeout:
+        except obswebsocket.exceptions.MessageTimeout as e:
             # self.logger.exception("Time:                {}.".format(time.strftime("%Y-%m-%d %H:%M:%S")))
-            recording_flag, paused_flag = self.get_status()
+            self.logger.exception("obs_ws exception:      {}.".format(e.args[0]))
             self.logger.exception("ws_call Request:       {}.".format(req.name))
             self.logger.exception("Before call Recording? {}.".format(self.recording_flag))
             self.logger.exception("Before call Paused?    {}.".format(self.paused_flag))
-            self.logger.exception("After call Recording?  {}.".format(recording_flag))
-            self.logger.exception("After call Paused?     {}.".format(paused_flag))
+            print("obs_ws exception:      {}.".format(e.args[0]))
+            print("ws_call Request:       {}.".format(req.name))
+            print("Before call Recording? {}.".format(self.recording_flag))
+            print("Before call Paused?    {}.".format(self.paused_flag))
+            self._update_status()
+            self.logger.exception("After call Recording?  {}.".format(self.recording_flag))
+            self.logger.exception("After call Paused?     {}.".format(self.paused_flag))
+            print("After call Recording?  {}.".format(self.recording_flag))
+            print("After call Paused?     {}.".format(self.paused_flag))
         except:
             self.logger.exception("ws.call: Unexpected error: {}.".format(sys.exc_info()[0]))
 
