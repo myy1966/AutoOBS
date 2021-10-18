@@ -48,17 +48,11 @@ class Window(QMainWindow):
 
         # load picture resoures
         pixmap_sz = QSize(STATUS_IMG_SZ, STATUS_IMG_SZ)
-        # self.stopped_pixmap = QPixmap("images/stopped.png").scaled(pixmap_sz)
-        # self.recording_pixmap = QPixmap("images/recording.png").scaled(pixmap_sz)
-        # self.paused_pixmap = QPixmap("images/paused.png").scaled(pixmap_sz)
         self.stopped_pixmap = QPixmap(":icons/stopped.png").scaled(pixmap_sz)
         self.recording_pixmap = QPixmap(":icons/recording.png").scaled(pixmap_sz)
         self.paused_pixmap = QPixmap(":icons/paused.png").scaled(pixmap_sz)
         self.pixmaps = [self.stopped_pixmap, self.recording_pixmap, self.paused_pixmap]
 
-        # self.stopped_icon = QIcon("images/stopped.png")
-        # self.recording_icon = QIcon("images/recording.png")
-        # self.paused_icon = QIcon("images/paused.png")
         self.stopped_icon = QIcon(":icons/stopped.png")
         self.recording_icon = QIcon(":icons/recording.png")
         self.paused_icon = QIcon(":icons/paused.png")
@@ -224,8 +218,9 @@ class Window(QMainWindow):
             if not os.path.isfile(CONF_FILE):
                 self.show_error_message("Configuration file (conf.toml) not found!")
             else:
-                conf = toml.load(CONF_FILE)
                 try:
+                    conf = toml.load(CONF_FILE)
+
                     host = conf["OBS"]["host"]
                     port = conf["OBS"]["port"]
                     pw = conf["OBS"]["password"]
@@ -240,6 +235,12 @@ class Window(QMainWindow):
                         if "counter_bound" in conf["AutoOBS"]:
                             global COUNTER_BOUND
                             COUNTER_BOUND = conf["AutoOBS"]["counter_bound"]
+                        if "stop_times" in conf["AutoOBS"]:
+                            stop_times = conf["AutoOBS"]["stop_times"]
+                        else:
+                            stop_times = []
+                except toml.TomlDecodeError as e:
+                    self.show_error_message("TomlDecodeError: \"{}\"!".format(e.args[0]))
                 except KeyError as e:
                     self.show_error_message("Configuration Key \"{}\" does not exist!".format(e.args[0]))
 
@@ -249,7 +250,7 @@ class Window(QMainWindow):
 
             ret = self.show_waiting_message()
             if ret == CONNECT_FAILED_RET:
-                self.show_error_message("Can not connect to the Obs Studio!")
+                self.show_error_message("Can not connect to the OBS Studio!")
             else:
                 break
 
@@ -258,7 +259,8 @@ class Window(QMainWindow):
 
         # set count thread
         self.count_thread = QThread()
-        self.count_worker = CountWorker(COUNTER_INTVL, self.counter, self.logger)
+        self.count_worker = CountWorker(COUNTER_INTVL, stop_times,
+                                        self.counter, self.logger)
         self.count_worker.pause.connect(self.auto_pause)
         self.count_worker.stop.connect(self.auto_stop)
         self.count_worker.moveToThread(self.count_thread)
@@ -268,7 +270,8 @@ class Window(QMainWindow):
 
         # set listen thread
         self.listen_thread = QThread()
-        self.listen_worker = ListenWorker(self.counter, self.logger)
+        self.listen_worker = ListenWorker(LISTENER_TIMER_TIME,
+                                          self.counter, self.logger)
         self.listen_worker.resume_sig.connect(self.auto_resume)
         self.listen_worker.moveToThread(self.listen_thread)
         self.listen_thread.started.connect(self.listen_worker.run)
@@ -279,20 +282,6 @@ class Window(QMainWindow):
         self.trigger_auto_mode()
 
     def show_error_message(self, info: str) -> None:
-        # self.logger.info("Begin error_message.")
-
-        # self.error_msg = QMessageBox()
-        # obs_icon = QIcon("images/idle.png")
-        # self.error_msg.setWindowIcon(obs_icon)
-        # self.error_msg.setWindowTitle("Error!")
-        # self.error_msg.setIcon(QMessageBox.Critical)
-        # self.error_msg.setText("Error!")
-        # self.error_msg.setInformativeText(info)
-        # self.error_msg.setStandardButtons(QMessageBox.Retry | QMessageBox.Abort)
-        # self.error_msg.setDefaultButton(QMessageBox.Retry)
-
-        # self.logger.info("Set error_message over.")
-
         self.error_msg.setInformativeText(info)
 
         ret = self.error_msg.exec()
@@ -300,20 +289,6 @@ class Window(QMainWindow):
             sys.exit(app.exit())
 
     def show_waiting_message(self) -> int:
-        # self.logger.info("Begin waiting_message.")
-
-        # self.waiting_msg = QMessageBox()
-        # obs_icon = QIcon("images/idle.png")
-        # self.waiting_msg.setWindowIcon(obs_icon)
-        # self.waiting_msg.setWindowTitle("Error!")
-        # self.waiting_msg.setIcon(QMessageBox.Critical)
-        # self.waiting_msg.setText("Error!")
-        # self.waiting_msg.setInformativeText(info)
-        # self.waiting_msg.setStandardButtons(QMessageBox.Abort)
-        # self.waiting_msg.setDefaultButton(QMessageBox.Abort)
-
-        # self.logger.info("Set waiting_message over.")
-
         ret = self.waiting_msg.exec()
         if ret == QMessageBox.Abort:
             sys.exit(app.exit())
@@ -342,7 +317,8 @@ class Window(QMainWindow):
         self.logger.debug("Tray icon single clicked.")
 
     def set_title(self, status: int) -> None:
-        self.setWindowTitle("AutoOBS | " + self.run_mode + " | " + status_to_str[status])
+        self.setWindowTitle("AutoOBS | " + self.run_mode +
+                                   " | " + status_to_str[status])
 
     @pyqtSlot()
     def update_ui(self, status: int) -> None:

@@ -1,6 +1,7 @@
 import time
 import datetime
 import logging
+from typing import List
 
 import pynput
 from PyQt5.QtCore import (
@@ -10,6 +11,8 @@ from PyQt5.QtCore import (
     QMutex,
     QTimer
 )
+
+from utils import time_in_range, add_seconds, sub_seconds
 
 
 class Counter:
@@ -42,7 +45,8 @@ class CountWorker(QObject):
     pause = pyqtSignal()
     stop = pyqtSignal()
 
-    def __init__(self, intvl: int, counter: Counter, logger: logging.Logger) -> None:
+    def __init__(self, intvl: int, stop_times: List[datetime.time],
+                 counter: Counter, logger: logging.Logger) -> None:
         super().__init__()
 
         self.logger = logger
@@ -50,13 +54,24 @@ class CountWorker(QObject):
         self.intvl = intvl
         self.counter = counter
 
+        self.stop_flag = False
+        self.stop_times = []
+        if len(stop_times) > 0:
+            self.stop_flag = True
+            for item in stop_times:
+                self.stop_times.append((sub_seconds(item, 5),
+                                        add_seconds(item, 5)))
+
     def check_time(self) -> bool:
-        if datetime.time(23, 59, 55) < datetime.datetime.now().time() < datetime.time(23, 59, 59) \
-            or datetime.time(0, 59, 55) < datetime.datetime.now().time() < datetime.time(0, 59, 59) \
-            or datetime.time(1, 59, 55) < datetime.datetime.now().time() < datetime.time(1, 59, 59):
-            return True
-        else:
+        if not self.stop_flag:
             return False
+
+        now = datetime.datetime.now().time()
+        for item in self.stop_times:
+            if time_in_range(item[0], item[1], now):
+                return True
+
+        return False
 
     @pyqtSlot()
     def run(self) -> None:
@@ -68,7 +83,7 @@ class CountWorker(QObject):
             if self.counter.overflow:
                 self.logger.debug("Counter overflow.")
                 if self.check_time():
-                    self.logger.debug("Time to midnight, emit stop.")
+                    self.logger.debug("Time to stop working, emit stop.")
 
                     self.stop.emit()
                 else:
@@ -79,15 +94,16 @@ class CountWorker(QObject):
                 self.counter.dec()
 
 
-from const import LISTENER_TIMER_TIME
-
 class ListenWorker(QObject):
 
     resume_sig = pyqtSignal()
     timer_start_sig = pyqtSignal()
 
-    def __init__(self, counter: Counter, logger: logging.Logger) -> None:
+    def __init__(self, timer_time: int,
+                 counter: Counter, logger: logging.Logger) -> None:
         super().__init__()
+
+        self.timer_time = timer_time
 
         self.logger = logger
 
@@ -97,7 +113,7 @@ class ListenWorker(QObject):
         self.timer.timeout.connect(self.timer_timeout)
         self.timer_start_sig.connect(self.timer_start)
         self.timeout_flag = False
-        self.timer.start(LISTENER_TIMER_TIME)
+        self.timer.start(timer_time)
 
     def on_event(self) -> None:
         if self.timeout_flag:
@@ -134,7 +150,7 @@ class ListenWorker(QObject):
 
     def timer_start(self) -> None:
         self.timeout_flag = False
-        self.timer.start(LISTENER_TIMER_TIME)
+        self.timer.start(self.timer_time)
 
     def timer_timeout(self) -> None:
         self.timeout_flag = True
