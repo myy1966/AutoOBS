@@ -10,10 +10,7 @@ from obswebsocket import obsws, requests
 import obswebsocket.exceptions
 
 from const import (
-    STATUS_STOPPED,
-    STATUS_RECRORDING,
-    STATUS_PAUSED,
-
+    OBStatus,
     CONNECT_FAILED_RET,
     CONNECT_SUCCESS_RET,
 )
@@ -86,74 +83,74 @@ class ObsWorker(QObject):
         self.paused_flag = status_flag.getIsRecordingPaused()
 
         if self.paused_flag:
-            self.status = STATUS_PAUSED
+            self.status = OBStatus.paused
         elif self.recording_flag:
-            self.status = STATUS_RECRORDING
+            self.status = OBStatus.recording
         else:
-            self.status = STATUS_STOPPED
+            self.status = OBStatus.stopped
 
     @pyqtSlot()
     def start(self) -> None:
         self._update_status()
-        if self.status == STATUS_STOPPED:
+        if self.status == OBStatus.stopped:
             self.logger.debug("Request starting.")
             self._ws_call(requests.StartRecording())
 
             self._update_status()
-            self.ui_update_sig.emit(STATUS_RECRORDING)
+            self.ui_update_sig.emit(OBStatus.recording)
 
     @pyqtSlot()
     def stop(self) -> None:
         self._update_status()
-        if self.status != STATUS_STOPPED:
+        if self.status != OBStatus.stopped:
             self.logger.debug("Request directly stopping.")
             self._ws_call(requests.StopRecording())
 
             self._update_status()
-            self.ui_update_sig.emit(STATUS_STOPPED)
+            self.ui_update_sig.emit(OBStatus.stopped)
 
     @pyqtSlot()
     def resume(self) -> None:
         self._update_status()
-        if self.status == STATUS_PAUSED:
+        if self.status == OBStatus.paused:
             self.logger.debug("Request resuming.")
             self._ws_call(requests.ResumeRecording())
 
             self._update_status()
-            self.ui_update_sig.emit(STATUS_RECRORDING)
+            self.ui_update_sig.emit(OBStatus.recording)
 
     @pyqtSlot()
     def pause(self) -> None:
         self._update_status()
-        if self.status == STATUS_RECRORDING:
+        if self.status == OBStatus.recording:
             self.logger.debug("Request pausing.")
             self._ws_call(requests.PauseRecording())
 
             self._update_status()
-            self.ui_update_sig.emit(STATUS_PAUSED)
+            self.ui_update_sig.emit(OBStatus.paused)
 
     @pyqtSlot()
     def resume_or_start(self) -> None:
         self._update_status()
-        if self.status == STATUS_PAUSED:
+        if self.status == OBStatus.paused:
             self.logger.debug("Request resuming in resume_or_start, status is paused.")
             self._ws_call(requests.ResumeRecording())
 
             self._update_status()
-            self.ui_update_sig.emit(STATUS_RECRORDING)
-        elif self.status == STATUS_STOPPED:
+            self.ui_update_sig.emit(OBStatus.recording)
+        elif self.status == OBStatus.stopped:
             self.logger.debug("Request resuming in resume_or_start, status is stopped.")
             self._ws_call(requests.StartRecording())
 
             self._update_status()
-            self.ui_update_sig.emit(STATUS_RECRORDING)
+            self.ui_update_sig.emit(OBStatus.recording)
 
     @pyqtSlot()
     def paused_then_stop(self) -> None:
         self._update_status()
-        if self.status == STATUS_PAUSED:
+        if self.status == OBStatus.paused:
             self.logger.debug("Request stopping when obs is paused.")
             self._ws_call(requests.StopRecording())
 
             self._update_status()
-            self.ui_update_sig.emit(STATUS_STOPPED)
+            self.ui_update_sig.emit(OBStatus.stopped)

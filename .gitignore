@@ -4,10 +4,12 @@ AutoOBS/__pycache__/
 AutoOBS/logs/
 AutoOBS/conf.toml
 
+logs/
+conf.toml
+
 __pycache__/
 build/
 dist/
-logs/
 AutoOBS.spec
 
 test/

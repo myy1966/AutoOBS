@@ -329,27 +329,21 @@ class Window(QMainWindow):
     # remote set obs and change status
     def _start(self) -> None:
         self.obs_start_sig.emit()
-        # self.update_ui(UI_STATUS_RECRORDING)
 
     def _stop(self) -> None:
         self.obs_stop_sig.emit()
-        # self.update_ui(UI_STATUS_STOPPED)
 
     def _resume(self) -> None:
         self.obs_resume_sig.emit()
-        # self.update_ui(UI_STATUS_RECRORDING)
 
     def _pause(self) -> None:
         self.obs_pause_sig.emit()
-        # self.update_ui(UI_STATUS_PAUSED)
 
     def _paused_then_stop(self) -> None:
         self.obs_paused_then_stop_sig.emit()
-        # self.update_ui(UI_STATUS_STOPPED)
 
     def _resume_or_start(self):
         self.obs_resume_or_start_sig.emit()
-        # self.update_ui(UI_STATUS_RECRORDING)
 
     # methods for auto mode
     @pyqtSlot()

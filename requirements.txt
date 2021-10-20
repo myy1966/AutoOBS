@@ -1,0 +1,4 @@
+obs-websocket-py
+pynput
+toml
+PyQt5

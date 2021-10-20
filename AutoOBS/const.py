@@ -1,3 +1,6 @@
+from enum import IntEnum
+
+
 CONF_FILE = "conf.toml"
 LOG_PATH = "./logs"
 DEBUG_FLAG = False
@@ -6,19 +9,20 @@ LISTENER_TIMER_TIME = 100
 COUNTER_INTVL = 1
 COUNTER_BOUND = 10
 
-STATUS_STOPPED = 0
-STATUS_RECRORDING = 1
-STATUS_PAUSED = 2
+class OBStatus(IntEnum):
+    stopped = 0
+    recording = 1
+    paused = 2
 
 status_to_str = {
-    STATUS_STOPPED: "stopped",
-    STATUS_RECRORDING: "recording",
-    STATUS_PAUSED: "paused" 
+    OBStatus.stopped: "stopped",
+    OBStatus.recording: "recording",
+    OBStatus.paused: "paused" 
 }
+
+CONNECT_FAILED_RET = 101
+CONNECT_SUCCESS_RET = 102
 
 WIN_SZ_W = 480
 WIN_SZ_H = 160
 STATUS_IMG_SZ = 128
-
-CONNECT_FAILED_RET = 101
-CONNECT_SUCCESS_RET = 102
