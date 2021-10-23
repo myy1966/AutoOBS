@@ -12,7 +12,7 @@ from PyQt5.QtCore import (
     QTimer
 )
 
-from utils import time_in_range, add_seconds, sub_seconds
+from AutoOBS.utils import time_in_range, add_seconds, sub_seconds
 
 
 class Counter:

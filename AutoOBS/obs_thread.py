@@ -9,7 +9,7 @@ from PyQt5.QtCore import (
 from obswebsocket import obsws, requests
 import obswebsocket.exceptions
 
-from const import (
+from AutoOBS.const import (
     OBStatus,
     CONNECT_FAILED_RET,
     CONNECT_SUCCESS_RET,

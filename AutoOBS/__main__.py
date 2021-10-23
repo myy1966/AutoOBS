@@ -21,10 +21,10 @@ from PyQt5.QtWidgets import (
     QMessageBox
 )
 
-from worker import Counter, CountWorker, ListenWorker
-from obs_thread import ObsWorker
-from const import *
-from resources import resources
+from AutoOBS.worker import Counter, CountWorker, ListenWorker
+from AutoOBS.obs_thread import ObsWorker
+from AutoOBS.const import *
+from AutoOBS.resources import resources
 
 
 app = None
