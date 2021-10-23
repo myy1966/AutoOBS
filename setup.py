@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 
 
@@ -6,8 +6,8 @@ ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(ROOT_PATH, "README.md"), encoding='utf-8') as f:
     LONG_DESC = f.read()
 
-# with open("requirements.txt", 'r', encoding='utf-8') as f:
-#     REQU = [x.strip() for x in f.readlines() if x]
+with open("requirements.txt", 'r', encoding='utf-8') as f:
+    REQU = [x.strip() for x in f.readlines() if x]
 
 
 setup(
@@ -40,14 +40,15 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
 
-    keywords='OBS obs-websocket, Qt PyQt',
+    keywords='OBS obs-websocket Qt PyQt',
 
-    # install_requires=REQU,
-
-    packages=['AutoOBS'],
+    packages=find_packages(),
 
     entry_points={
         'gui_scripts': [
             'AutoOBS = AutoOBS.__main__:main']
-    }
+    },
+
+    install_requires=REQU,
+    include_package_data=True,
 )
